@@ -6,7 +6,7 @@
 
 import os
 import numpy as np
-from sklearn.externals import joblib
+import joblib
 from model_core.templates.interface import BaseMLModelTemplate
 
 from tslearn.piecewise import SymbolicAggregateApproximation

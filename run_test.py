@@ -7,7 +7,7 @@
 from model_core.config import ModelParam
 from data_factory.takedata import LoadData
 from model_core.state_model import ClusterStateRecognition, SAXStateRecognition, ShapletStateRecognition
-
+import os
 
 def main():
     params = ModelParam()

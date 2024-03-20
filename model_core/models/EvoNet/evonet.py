@@ -24,15 +24,15 @@ class EvoNet():
 
     def __weights__(self, input_dim, output_dim, name, init=True, std=0.1, reg=None):
         if init:
-            return tf.get_variable(name, shape=[input_dim, output_dim], initializer=tf.random_normal_initializer(0.0, std), regularizer=reg)
+            return tf.compat.v1.get_variable(name, shape=[input_dim, output_dim], initializer=tf.random_normal_initializer(0.0, std), regularizer=reg)
         else:
-            return tf.get_variable(name, shape=[input_dim, output_dim])
+            return tf.compat.v1.get_variable(name, shape=[input_dim, output_dim])
 
     def __bias__(self, output_dim, name, init=True):
         if init:
-            return tf.get_variable(name, shape=[output_dim], initializer=tf.constant_initializer(1.0))
+            return tf.compat.v1.get_variable(name, shape=[output_dim], initializer=tf.constant_initializer(1.0))
         else:
-            return tf.get_variable(name, shape=[output_dim])
+            return tf.compat.v1.get_variable(name, shape=[output_dim])
 
     def __GetLearnableParams__(self, is_training):
         # local aggregation - message passing
@@ -168,7 +168,7 @@ class EvoNet():
         return current_hidden, current_memory
 
     def Cell(self, send_nodes, receive_nodes, event, prev_graph_emb, prev_graph_mem, prev_node_emb, prev_node_mem):
-        with tf.variable_scope('ETNet_Unit'):
+        with tf.compat.v1.variable_scope('ETNet_Unit'):
 
             # intermediate node representation
             H_nodes = self.MessagePassing(send_nodes, receive_nodes, prev_node_emb)

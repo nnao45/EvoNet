@@ -3,8 +3,10 @@
 import os
 import numpy as np
 import tensorflow as tf
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.optimizers import Adam
 from xgboost import XGBClassifier
-from sklearn.externals import joblib
+import joblib
 
 from model_core.models.EvoNet.evonet import EvoNet
 from model_core.templates.interface import BaseMLModelTemplate
@@ -14,10 +16,10 @@ class EvoNet_TSC(BaseMLModelTemplate):
 
     def build_model(self, is_training):
 
-        self.x = tf.placeholder(tf.float32, [None, self.param.his_len, self.param.segment_len, self.param.segment_dim], name='input_raw_sequence')
-        self.a = tf.placeholder(tf.float32, [None, self.param.his_len, self.param.n_state], name='input_state_sequence')
-        self.p = tf.placeholder(tf.float32, [self.param.n_state, self.param.node_dim], name='input_state_features')
-        self.y = tf.placeholder(tf.int32, [None, self.param.his_len+1], name='input_event_label')
+        self.x = tf.compat.v1.placeholder(tf.float32, [None, self.param.his_len, self.param.segment_len, self.param.segment_dim], name='input_raw_sequence')
+        self.a = tf.compat.v1.placeholder(tf.float32, [None, self.param.his_len, self.param.n_state], name='input_state_sequence')
+        self.p = tf.compat.v1.placeholder(tf.float32, [self.param.n_state, self.param.node_dim], name='input_state_features')
+        self.y = tf.compat.v1.placeholder(tf.int32, [None, self.param.his_len+1], name='input_event_label')
 
         y_clf = tf.one_hot(self.y, self.param.n_event)
 
@@ -29,12 +31,17 @@ class EvoNet_TSC(BaseMLModelTemplate):
 
         # output
         patterns = tf.reshape(graph_logits, [-1, self.param.graph_dim])
-        net = tf.layers.dense(patterns, 512, activation=tf.nn.relu, name="outnet_fc1")
-        out_logits = tf.layers.dense(net, self.param.n_event, activation=tf.nn.relu, name='outnet_fc2')
+        # net = tf.compat.v1.layers.dense(patterns, 512, activation=tf.nn.relu, name="outnet_fc1")
+        # out_logits = tf.layers.dense(net, self.param.n_event, activation=tf.nn.relu, name='outnet_fc2')
+        net = Dense(512, activation=tf.nn.relu, name="outnet_fc1")(patterns)
+        out_logits = Dense(self.param.n_event, activation=tf.nn.relu, name='outnet_fc2')(net)
 
         # loss and train
-        self.net_loss = tf.reduce_mean(tf.losses.softmax_cross_entropy(tf.reshape(y_clf[:, 2:], [-1, self.param.n_event]), out_logits))
-        self.net_optim = tf.train.AdamOptimizer(self.param.learning_rate, beta1=0.7).minimize(self.net_loss)
+        # self.net_loss = tf.reduce_mean(tf.losses.softmax_cross_entropy(tf.reshape(y_clf[:, 2:], [-1, self.param.n_event]), out_logits))
+        self.net_loss = tf.reduce_mean(
+            tf.keras.losses.categorical_crossentropy(tf.reshape(y_clf[:, 2:], [-1, self.param.n_event]), out_logits))
+        self.net_optim = tf.compat.v1.train.AdamOptimizer(self.param.learning_rate, beta1=0.7).minimize(self.net_loss)
+        # self.net_optim = Adam(self.param.learning_rate, beta_1=0.7).minimize(self.net_loss)
 
         # classification test
         patterns_g = tf.reduce_mean(graph_logits, axis=1)
@@ -44,7 +51,7 @@ class EvoNet_TSC(BaseMLModelTemplate):
 
         self.clf = XGBClassifier(n_estimators=500, max_depth=6, n_jobs=self.param.n_jobs, scale_pos_weight=self.param.pos_weight)
 
-        self.saver = tf.train.Saver()
+        self.saver = tf.compat.v1.train.Saver()
 
         return 0
 

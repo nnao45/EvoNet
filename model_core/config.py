@@ -4,11 +4,11 @@ import os
 
 class ModelParam(object):
     # basic
-    model_save_path = "./Repo/model"
+    model_save_path = "./model"
     n_jobs = os.cpu_count()
 
     # dataset
-    data_path = './Repo/data'
+    data_path = './data'
     data_name = 'netflow'
     his_len = 15
     segment_len = 24

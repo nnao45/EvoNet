@@ -3,7 +3,7 @@
 import os
 import numpy as np
 from sklearn.mixture import GaussianMixture
-from sklearn.externals import joblib
+import joblib
 from model_core.templates.interface import BaseMLModelTemplate
 
 

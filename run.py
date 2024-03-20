@@ -46,7 +46,7 @@ def main(dataname, gpu=0):
     state_model = ClusterStateRecognition()
     state_model.set_configuration(params)
     state_model.build_model()
-    # state_model.fit(rawx)
+    state_model.fit(rawx)
     train_prob, train_patterns = state_model.predict(trainx)
     test_prob, test_patterns = state_model.predict(testx)
     print(train_patterns.shape, train_prob.shape, test_patterns.shape, test_prob.shape)
@@ -61,12 +61,13 @@ def main(dataname, gpu=0):
     model = EvoNet_TSC()
 
     model.set_configuration(params)
-    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=1.0)
-    config = tf.ConfigProto(gpu_options=gpu_options)
+    gpu_options = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=1.0)
+    config = tf.compat.v1.ConfigProto(gpu_options=gpu_options)
+    # config = tf.ConfigProto(gpu_options=None)
     print('model training...')
-    with tf.Session(config=config) as sess:
+    with tf.compat.v1.Session(config=config) as sess:
         model.build_model(is_training=True)
-        init_vars = tf.global_variables_initializer()
+        init_vars = tf.compat.v1.global_variables_initializer()
         sess.run(init_vars)
 
         bestP = 0.0
@@ -86,7 +87,7 @@ def main(dataname, gpu=0):
 
     print("model testing...")
     tf.reset_default_graph()
-    with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
+    with tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(allow_soft_placement=True)) as sess:
         model.build_model(is_training=False)
         model.restore(params.model_save_path, sess=sess)
         y_pred, y_pred_prob = model.predict(sess, testloader)
