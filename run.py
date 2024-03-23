@@ -61,7 +61,7 @@ def main(dataname, gpu=0):
     model = EvoNet_TSC()
 
     model.set_configuration(params)
-    gpu_options = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=1.0)
+    gpu_options = tf.compat.v1.GPUOptions(allow_growth = True)
     config = tf.compat.v1.ConfigProto(gpu_options=gpu_options)
     # config = tf.ConfigProto(gpu_options=None)
     print('model training...')
@@ -86,7 +86,7 @@ def main(dataname, gpu=0):
 
 
     print("model testing...")
-    tf.reset_default_graph()
+    tf.compat.v1.reset_default_graph()
     with tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(allow_soft_placement=True)) as sess:
         model.build_model(is_training=False)
         model.restore(params.model_save_path, sess=sess)
@@ -133,9 +133,9 @@ def getattention(dataname, gpu=0):
     # model
     model = EvoNet_TSC()
     model.set_configuration(params)
-    tf.reset_default_graph()
+    tf.compat.v1.reset_default_graph()
 
-    with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
+    with tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(allow_soft_placement=True)) as sess:
         model.build_model(is_training=False)
         model.restore(params.model_save_path, sess=sess)
 
@@ -148,7 +148,7 @@ def getattention(dataname, gpu=0):
         print(logstr)
 
         store_obj = {'x': rawx, 'y': rawy, 'prob': prob, 'pattern':patterns, 'attention':attentions}
-        pickle.dump(store_obj, open('./Repo/output/result_{}.pkl'.format(dataname), 'wb'), pickle.HIGHEST_PROTOCOL)
+        pickle.dump(store_obj, open('./output/result_{}.pkl'.format(dataname), 'wb'), pickle.HIGHEST_PROTOCOL)
 
 
 if __name__ == '__main__':
